@@ -6,9 +6,9 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from .models import VGG16
 
-
-def train_model(model, train_loader, test_loader, trainset, testset, device, num_epochs=10, lr=1e-4):
+def train_model(model: VGG16, train_loader, test_loader, trainset, testset, device, num_epochs=10, lr=0.1):
     """
     Train the model.
     
@@ -32,38 +32,39 @@ def train_model(model, train_loader, test_loader, trainset, testset, device, num
     test_acc_list = []
 
     for epoch in tqdm(range(num_epochs), unit='epoch'):
+        #For each epoch
         model.train()
         train_correct = 0
-        
         for minibatch_no, (data, target) in tqdm(enumerate(train_loader), total=len(train_loader)):
             data, target = data.to(device), target.to(device)
+            #Zero the gradients computed for each weight
             optimizer.zero_grad()
+            #Forward pass your image through the network
             output = model(data)
-            loss = F.cross_entropy(output, target)
+            #Compute the loss
+            loss = F.nll_loss(torch.log(output), target)
+            #Backward pass through the network
             loss.backward()
+            #Update the weights
             optimizer.step()
+            
+            #Compute how many were correctly classified
             predicted = output.argmax(1)
-            train_correct += (target == predicted).sum().cpu().item()
-        
-        # Evaluate on test set
+            train_correct += (target==predicted).sum().cpu().item()
+        #Comput the test accuracy
         test_correct = 0
         model.eval()
         for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
+            data = data.to(device)
             with torch.no_grad():
                 output = model(data)
-            predicted = output.argmax(1)
-            test_correct += (target == predicted).sum().item()
-        
-        train_acc = train_correct / len(trainset)
-        test_acc = test_correct / len(testset)
-        train_acc_list.append(train_acc)
-        test_acc_list.append(test_acc)
-        
-        print("Accuracy train: {train:.1f}%\t test: {test:.1f}%".format(
-            test=100*test_acc, train=100*train_acc))
-
-    return train_acc_list, test_acc_list
+            predicted = output.argmax(1).cpu()
+            test_correct += (target==predicted).sum().item()
+        train_acc = train_correct/len(trainset)
+        test_acc = test_correct/len(testset)
+        print("Accuracy train: {train:.1f}%\t test: {test:.1f}%".format(test=100*test_acc, train=100*train_acc))
+    
+        return train_acc_list, test_acc_list
 
 
 def plot_training_results(train_acc_list, test_acc_list):

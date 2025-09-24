@@ -70,7 +70,7 @@ def main():
     
     # Plot results
     print("Plotting training results...")
-    plot_training_results(train_acc_list, test_acc_list)
+    # plot_training_results(train_acc_list, test_acc_list)
     
     # Save the trained model
     model_path = '../../models/resnet18_hotdog.pth'
