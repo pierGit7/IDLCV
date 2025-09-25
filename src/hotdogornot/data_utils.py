@@ -18,17 +18,25 @@ def get_transforms(size=128):
     Returns:
         tuple: (train_transform, test_transform)
     """
+    
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                     std=[0.229, 0.224, 0.225])
+
+    
     train_transform = transforms.Compose([
         transforms.Resize((size, size)),
-        transforms.RandomVerticalFlip(), 
-        transforms.RandomHorizontalFlip(), 
-        transforms.GaussianBlur(3), 
-        transforms.ToTensor()
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.1),
+        transforms.RandomRotation(degrees=10),
+        transforms.ColorJitter(0.4, 0.4, 0.4, 0.1),
+        transforms.ToTensor(),
+        normalize
     ])
     
     test_transform = transforms.Compose([
         transforms.Resize((size, size)), 
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        normalize
     ])
     
     return train_transform, test_transform

@@ -6,9 +6,9 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from .models import VGG16
+from .architecture.vgg import VGG16
 
-def train_model(model: VGG16, train_loader, test_loader, trainset, testset, device, num_epochs=10, lr=0.1):
+def train_model(model: VGG16, train_loader, test_loader, trainset, testset, device, lr, num_epochs=15 ):
     """
     Train the model.
     
@@ -25,46 +25,65 @@ def train_model(model: VGG16, train_loader, test_loader, trainset, testset, devi
     Returns:
         tuple: (train_acc_list, test_acc_list) - accuracy lists for each epoch
     """
-    # Initialize optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # Initialize optimizer with better learning rate
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
     
     train_acc_list = []
     test_acc_list = []
-
+    
     for epoch in tqdm(range(num_epochs), unit='epoch'):
-        #For each epoch
+        # Training phase
         model.train()
         train_correct = 0
+        total_loss = 0
+        
         for minibatch_no, (data, target) in tqdm(enumerate(train_loader), total=len(train_loader)):
             data, target = data.to(device), target.to(device)
-            #Zero the gradients computed for each weight
+            
+            # Zero the gradients computed for each weight
             optimizer.zero_grad()
-            #Forward pass your image through the network
+            
+            # Forward pass your image through the network
             output = model(data)
-            #Compute the loss
-            loss = F.nll_loss(torch.log(output), target)
-            #Backward pass through the network
+            
+            # Compute the loss
+            loss = F.cross_entropy(output, target)
+            total_loss += loss.item()
+            
+            # Backward pass through the network
             loss.backward()
-            #Update the weights
+            
+            # Update the weights
             optimizer.step()
             
-            #Compute how many were correctly classified
+            # Compute how many were correctly classified
             predicted = output.argmax(1)
             train_correct += (target==predicted).sum().cpu().item()
-        #Comput the test accuracy
+        
+        # Evaluation phase
         test_correct = 0
         model.eval()
-        for data, target in test_loader:
-            data = data.to(device)
-            with torch.no_grad():
+        with torch.no_grad():
+            for data, target in test_loader:
+                data = data.to(device)
+                target = target.to(device)  # Keep target on same device
                 output = model(data)
-            predicted = output.argmax(1).cpu()
-            test_correct += (target==predicted).sum().item()
+                predicted = output.argmax(1)
+                test_correct += (target==predicted).sum().item()
+        
+        # Calculate accuracies
         train_acc = train_correct/len(trainset)
         test_acc = test_correct/len(testset)
-        print("Accuracy train: {train:.1f}%\t test: {test:.1f}%".format(test=100*test_acc, train=100*train_acc))
+        
+        # Store accuracies for plotting
+        train_acc_list.append(train_acc)
+        test_acc_list.append(test_acc)
+        
+        avg_loss = total_loss / len(train_loader)
+        print("Epoch {}: Loss: {:.4f}, Accuracy train: {train:.1f}%\t test: {test:.1f}%".format(
+            epoch+1, avg_loss, test=100*test_acc, train=100*train_acc))
     
-        return train_acc_list, test_acc_list
+    return train_acc_list, test_acc_list
 
 
 def plot_training_results(train_acc_list, test_acc_list):

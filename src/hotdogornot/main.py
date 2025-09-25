@@ -6,7 +6,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from hotdogornot.models import VGG16
+from hotdogornot.architecture.vgg import VGG16
 from hotdogornot.data_utils import get_dataloaders
 from hotdogornot.train import train_model, plot_training_results
 from hotdogornot.utils import setup_device, visualize_samples, count_parameters
@@ -18,7 +18,7 @@ def main():
     device = setup_device()
     
     # Data loading parameters
-    batch_size = 128
+    batch_size = 64
     size = 128
     
     # Get data loaders
@@ -33,8 +33,7 @@ def main():
     
     # Visualize some samples
     print("Visualizing sample images...")
-    visualize_samples(train_loader)
-    
+    # visualize_samples(train_loader)
     # Create model
     print("Creating VGG16 model...")
     model = VGG16()
@@ -52,8 +51,8 @@ def main():
         return
     
     # Training parameters
-    num_epochs = 10
-    lr = 1e-4
+    num_epochs = 30
+    lr = 1e-4  # Increased learning rate for better convergence
     
     # Train the model
     print(f"Starting training for {num_epochs} epochs...")
@@ -64,8 +63,8 @@ def main():
         trainset=trainset,
         testset=testset,
         device=device,
-        num_epochs=num_epochs,
-        lr=lr
+        lr=lr,
+        num_epochs=num_epochs
     )
     
     # Plot results
@@ -73,7 +72,7 @@ def main():
     # plot_training_results(train_acc_list, test_acc_list)
     
     # Save the trained model
-    model_path = '../../models/resnet18_hotdog.pth'
+    model_path = 'models/VGG16_hotdog.pth'
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     
     from hotdogornot.utils import save_model
