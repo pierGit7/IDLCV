@@ -176,7 +176,3 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 DEEPLCV/*
-project_image_clasification/hotdog_nothotdog
-video_classification/__pycache__/
-video_classification/data
-project_image_clasification/models
