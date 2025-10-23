@@ -13,7 +13,7 @@ from hotdogornot.train import train_model, plot_training_results
 from hotdogornot.utils import setup_device, visualize_samples, count_parameters
 from hotdogornot.architecture.resnet18 import ResNet18
 import torch.optim as optim
-from torchvision.models import vgg16, VGG16_Weights, vgg16_bn
+from torchvision.models import vgg16, VGG16_Weights, FZ
 import torch.nn as nn
 
 

@@ -2,6 +2,7 @@
 import torch.nn.functional as F
 import torch
 import torch.nn as nn
+from torchvision.models import vgg16_bn
 
 class VGG16(nn.Module):
     def __init__(self):
@@ -71,7 +72,7 @@ class LateFusionVGG16(nn.Module):
     def __init__(self, num_classes=2):
         super().__init__()
         # reuse the feature extractor from your VGG16
-        self.features = VGG16().features
+        self.features = vgg16_bn(pretrained = True).features
 
         # spatial pooling to reduce (H, W) → (1, 1)
         self.spatial_pool = nn.AdaptiveAvgPool2d((1, 1))
@@ -90,7 +91,7 @@ class LateFusionVGG16(nn.Module):
 
         # rearrange so we can process all frames in batch mode
         x = x.permute(0, 2, 1, 3, 4)  # [B, T, C, H, W]
-        x = x.reshape(B * T, C, H, W)  # [B*T, C, H, W]
+        x = x.reshape(B * T, C, H, W)  # [B*T, C, H, W] 
 
         # run 2D CNN feature extractor on each frame
         features = self.features(x)  # [B*T, 512, 8, 8]

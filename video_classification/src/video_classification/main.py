@@ -1,5 +1,5 @@
 """
-Main script to run the Hotdog/Not Hotdog classification training.
+Main script to run the Video classification training.
 """
 
 import sys
@@ -39,13 +39,13 @@ def main():
     # Get data loaders
     print("Loading data...")
     train_loader, val_loader, test_loader, train_dataset, val_dataset, test_dataset = get_frame_loader(
+    # root_dir='/dtu/datasets1/02516/ucf101_noleakage/',
     root_dir='video_classification/data/ufc10',
     batch_size=8,
     use_video=True,          # True = use FrameVideoDataset, False = FrameImageDataset
     stack_frames=True,       # Only matters if use_video=True
     n_workers=4
     )
-    print(train_loader.dataset.shape)
     
     
     # Visualize some samples
