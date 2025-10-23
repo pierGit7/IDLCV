@@ -100,7 +100,7 @@ def get_frame_loader(
 ):
     # --- Common transforms ---
     transform = T.Compose([
-        T.Resize((64, 64)),
+        T.Resize((128, 128)),
         T.ToTensor()
     ])
 

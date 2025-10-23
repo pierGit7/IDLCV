@@ -5,7 +5,7 @@ import torch.nn as nn
 from torchvision.models import vgg16_bn
 
 class VGG16(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=2):
         super().__init__()
         self.features = nn.Sequential(
             # input size: 3x128x128
@@ -56,7 +56,7 @@ class VGG16(nn.Module):
             nn.Linear(512*8*8, 512),
             nn.ReLU(inplace=True),
             nn.Dropout(0.5),
-            nn.Linear(512, 2)
+            nn.Linear(512, num_classes)
             #softmax will be applied in the loss function
         )
 

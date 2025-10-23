@@ -39,10 +39,9 @@ def main():
     # Get data loaders
     print("Loading data...")
     train_loader, val_loader, test_loader, train_dataset, val_dataset, test_dataset = get_frame_loader(
-    # root_dir='/dtu/datasets1/02516/ucf101_noleakage/',
     root_dir='video_classification/data/ufc10',
     batch_size=8,
-    use_video=True,          # True = use FrameVideoDataset, False = FrameImageDataset
+    use_video=False,          # True = use FrameVideoDataset, False = FrameImageDataset
     stack_frames=True,       # Only matters if use_video=True
     n_workers=4
     )
@@ -53,7 +52,7 @@ def main():
     # visualize_samples(train_loader)
     # Create model
     print("Creating VGG model...")
-    model = LateFusionVGG16(num_classes=10)
+    model = VGG16(num_classes=10)
     model.to(device)
     
     # Test model with a batch
