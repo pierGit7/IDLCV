@@ -4,7 +4,7 @@ import pandas as pd
 from PIL import Image
 import torch
 from torch.utils.data import DataLoader
-from torchvision import transforms as T
+from torchvision import transforms 
 
 class FrameImageDataset(torch.utils.data.Dataset):
     def __init__(self, 
@@ -98,10 +98,24 @@ def get_frame_loader(
     stack_frames=True,       # Only matters if use_video=True
     n_workers=4
 ):
+    size = 128
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                 std=[0.229, 0.224, 0.225])
     # --- Common transforms ---
-    transform = T.Compose([
-        T.Resize((128, 128)),
-        T.ToTensor()
+    train_transform = transforms.Compose([
+        transforms.RandomResizedCrop(size, scale=(0.8, 1.0)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(10),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.05),
+        transforms.ToTensor(),
+        normalize
+    ])
+
+    
+    test_transform = transforms.Compose([
+        transforms.Resize((size, size)), 
+        transforms.ToTensor(),
+        normalize
     ])
 
     # Choose which dataset class to use
@@ -111,7 +125,7 @@ def get_frame_loader(
     train_dataset = DatasetClass(
         root_dir=root_dir,
         split='train',
-        transform=transform,
+        transform=train_transform,
         **({'stack_frames': stack_frames} if use_video else {})
     )
 
@@ -119,7 +133,7 @@ def get_frame_loader(
     val_dataset = DatasetClass(
         root_dir=root_dir,
         split='val',
-        transform=transform,
+        transform=test_transform,
         **({'stack_frames': stack_frames} if use_video else {})
     )
 
@@ -127,7 +141,7 @@ def get_frame_loader(
     test_dataset = DatasetClass(
         root_dir=root_dir,
         split='test',
-        transform=transform,
+        transform=test_transform,
         **({'stack_frames': stack_frames} if use_video else {})
     )
 

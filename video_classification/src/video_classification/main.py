@@ -11,6 +11,8 @@ from video_classification.architecture.vgg16 import VGG16, LateFusionVGG16
 from datasets import get_frame_loader
 from video_classification.train import train_model, plot_training_results
 import torch.optim as optim
+from torchvision.models import vgg16_bn
+
 def setup_device():
     """
     Setup device for training (GPU if available, else CPU).
@@ -52,7 +54,7 @@ def main():
     # visualize_samples(train_loader)
     # Create model
     print("Creating VGG model...")
-    model = VGG16(num_classes=10)
+    model = vgg16_bn(pretrained=True)
     model.to(device)
     
     # Test model with a batch
@@ -65,16 +67,18 @@ def main():
         return
     
     # Training parameters
-    num_epochs = 50
+    num_epochs = 20
     lr = 1e-4  # Increased learning rate for better convergence
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
     # Train the model
     print(f"Starting training for {num_epochs} epochs...")
-    train_acc_list, test_acc_list = train_model(
+    _, history, _ = train_model(
         model=model,
         train_loader=train_loader,
+        val_loader=val_loader,
         test_loader=test_loader,
         trainset=train_dataset,
+        valset=val_dataset,
         testset=test_dataset,
         device=device,
         num_epochs=num_epochs,
@@ -83,7 +87,7 @@ def main():
     
     # Plot results
     print("Plotting training results...")
-    plot_training_results(train_acc_list, test_acc_list)
+    plot_training_results(history, title="VGG16_bn Single Frame model")
     
     
     print("Training completed!")
